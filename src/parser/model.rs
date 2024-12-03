@@ -86,7 +86,7 @@ impl FromStr for CompareOp {
 // https://datatracker.ietf.org/doc/html/rfc3986#appendix-A
 pub type Uri = String;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct AttrName(pub(crate) String);
 
 impl AttrName {
