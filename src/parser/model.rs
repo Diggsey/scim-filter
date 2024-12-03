@@ -97,10 +97,12 @@ impl AttrName {
             name_chars.into_iter().collect::<String>()
         ))
     }
+}
 
-    #[cfg(test)]
-    pub fn from_str<'a>(name: &str) -> Self {
-        Self(name.to_string())
+#[cfg(test)]
+impl From<&str> for AttrName {
+    fn from(s: &str) -> Self {
+        Self(s.to_string())
     }
 }
 

@@ -37,7 +37,7 @@ where
     })
 }
 
-impl<'a> Filter<'a> {
+impl Filter<'_> {
     pub fn r#match(&self, resource: &JsonValue) -> MatcherResult<bool> {
         match self {
             Filter::AttrExp(attr_expr_data) => attr_expr_data.r#match(resource),
@@ -54,7 +54,7 @@ impl<'a> Filter<'a> {
     }
 }
 
-impl<'a> AttrExpData<'a> {
+impl AttrExpData<'_> {
     pub fn r#match(&self, resource: &JsonValue) -> MatcherResult<bool> {
         match self {
             AttrExpData::Present(attr_path) => Ok(!attr_path.extract_value(resource).is_null()),
@@ -67,13 +67,13 @@ impl<'a> AttrExpData<'a> {
 }
 
 trait CaseInsensitiveGet {
-    fn get_insensitive(&self, key: &String) -> Option<&Value>;
+    fn get_insensitive(&self, key: &str) -> Option<&Value>;
 }
 
 impl CaseInsensitiveGet for Map<String, Value> {
-    fn get_insensitive(&self, key: &String) -> Option<&Value> {
+    fn get_insensitive(&self, key: &str) -> Option<&Value> {
         for (value_key, value) in self {
-            if value_key.to_lowercase() == key.to_lowercase() {
+            if value_key.eq_ignore_ascii_case(key) {
                 return Some(value);
             }
         }
@@ -128,7 +128,7 @@ impl AttrPath {
     }
 }
 
-impl<'a> LogExpData<'a> {
+impl LogExpData<'_> {
     pub fn r#match(&self, resource: &JsonValue) -> MatcherResult<bool> {
         // check if the left side is a match
         let left_match = self.left.r#match(resource)?;
@@ -147,13 +147,13 @@ impl<'a> LogExpData<'a> {
     }
 }
 
-impl<'a> ValuePathData<'a> {
+impl ValuePathData<'_> {
     pub fn r#match(&self, resource: &JsonValue) -> MatcherResult<bool> {
         self.val_filter().r#match(self.attr_path(), resource)
     }
 }
 
-impl<'a> ValFilter<'a> {
+impl ValFilter<'_> {
     pub fn r#match(&self, attr_path: &AttrPath, resource: &JsonValue) -> MatcherResult<bool> {
         let mut sub_resource = resource[&attr_path.attr_name().0].clone();
         if let Some(sub_attr) = attr_path.sub_attr() {
@@ -187,7 +187,7 @@ impl<'a> ValFilter<'a> {
     }
 }
 
-impl<'a> CompValue<'a> {
+impl CompValue<'_> {
     fn compare_false(resource_value: bool, compare_op: &CompareOp) -> MatcherResult<bool> {
         match compare_op {
             CompareOp::Equal => Ok(!resource_value),

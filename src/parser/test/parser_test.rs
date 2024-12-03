@@ -6,8 +6,8 @@ use crate::parser::CompareOp::*;
 use crate::parser::Filter::{Sub, ValuePath};
 use crate::parser::LogExpOperator::*;
 use crate::parser::{
-    scim_filter_parser, AttrExpData, AttrName, AttrPath, CompValue, CompareOp, Filter, LogExpData,
-    SubAttr, ValFilter, ValuePathData,
+    scim_filter_parser, AttrExpData, AttrPath, CompValue, CompareOp, Filter, LogExpData, ValFilter,
+    ValuePathData,
 };
 
 fn attribute_expression<'a>(
@@ -15,16 +15,12 @@ fn attribute_expression<'a>(
     compare_op: CompareOp,
     value: &'a str,
 ) -> Filter<'a> {
-    let attr_path = AttrPath::new((None, AttrName::from_str(attribute), None));
+    let attr_path = AttrPath::new((None, attribute.into(), None));
     Filter::AttrExp(Compare(attr_path, compare_op, CompValue::String(value)))
 }
 
 fn attribute_expression_pr(attribute: &str) -> Filter {
-    Filter::AttrExp(Present(AttrPath::new((
-        None,
-        AttrName::from_str(attribute),
-        None,
-    ))))
+    Filter::AttrExp(Present(AttrPath::new((None, attribute.into(), None))))
 }
 
 #[test]
@@ -196,7 +192,7 @@ fn complex_attributes() {
             left: Box::new(attribute_expression("userType", Equal, "Employee")),
             log_exp_operator: And,
             right: Box::new(ValuePath(ValuePathData::new((
-                AttrPath::new((None, AttrName::from_str("emails"), None)),
+                AttrPath::new((None, "emails".into(), None)),
                 ValFilter::LogExp(LogExpData {
                     left: Box::new(attribute_expression("type", Equal, "work")),
                     log_exp_operator: And,
@@ -224,11 +220,7 @@ fn not_expressions() {
                     left: Box::new(attribute_expression("emails", Contains, "example.com")),
                     log_exp_operator: Or,
                     right: Box::new(Filter::AttrExp(Compare(
-                        AttrPath::new((
-                            None,
-                            AttrName::from_str("emails"),
-                            Some(SubAttr::from_str("value"))
-                        )),
+                        AttrPath::new((None, "emails".into(), Some("value".into()))),
                         Contains,
                         CompValue::String("example.org")
                     )))
@@ -248,7 +240,7 @@ fn full_attribute_name() {
         Filter::AttrExp(Compare(
             AttrPath::new((
                 Some("urn:ietf:params:scim:schemas:extension:enterprise:2.0".to_string()),
-                AttrName::from_str("User"),
+                "User".into(),
                 None
             )),
             Equal,
@@ -263,7 +255,7 @@ fn decimal_value() {
     let parsed = scim_filter_parser("decimal eq 2.3");
     assert_eq!(
         Filter::AttrExp(AttrExpData::Compare(
-            AttrPath::new((None, AttrName::from_str("decimal"), None)),
+            AttrPath::new((None, "decimal".into(), None)),
             Equal,
             CompValue::Number(dec!(2.3))
         )),
